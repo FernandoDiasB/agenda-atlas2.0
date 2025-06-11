@@ -1,5 +1,6 @@
 package com.agendaatlas.shared.config;
 
+import com.agendaatlas.shared.JwtFilter;
 import com.agendaatlas.usuarios.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,16 +15,19 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private final JwtFilter jwtFilter;
     private final UserRepository userRepository;
 
-    public SecurityConfig(UserRepository userRepository) {
+    public SecurityConfig(UserRepository userRepository, JwtFilter jwtFilter) {
         this.userRepository = userRepository;
+        this.jwtFilter = jwtFilter;
     }
 
     @Bean
@@ -59,9 +63,11 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html")
-                        .permitAll()
+                                "/swagger-ui.html",
+                                "/api/pacientes/**" // <== liberando essa rota
+                        ).permitAll()
                         .anyRequest().authenticated())
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }

@@ -5,50 +5,41 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.agendaatlas.pacientes.model.Paciente;
-import com.agendaatlas.pacientes.repository.PacienteRepository;
+import com.agendaatlas.pacientes.service.PacienteService;
 
 @RestController
 @RequestMapping("/api/pacientes")
 public class PacienteController {
 
-    private final PacienteRepository pacienteRepository;
-
     @Autowired
-    public PacienteController(PacienteRepository pacienteRepository) {
-        this.pacienteRepository = pacienteRepository;
-    }
+    private PacienteService pacienteService;
 
     @PostMapping
-    public Paciente criarPaciente(@RequestBody Paciente paciente) {
-        return pacienteRepository.save(paciente);
+    public ResponseEntity<Paciente> criarPaciente(@RequestBody Paciente paciente) {
+        Paciente novoPaciente = pacienteService.criarPaciente(paciente);
+        return ResponseEntity.status(HttpStatus.CREATED).body(novoPaciente);
     }
 
     @GetMapping
-    public List<Paciente> listarPacientes() {
-        return pacienteRepository.findAll();
+    public ResponseEntity<List<Paciente>> listarPacientes() {
+        return ResponseEntity.ok(pacienteService.listarTodos());
     }
 
     @DeleteMapping
     public ResponseEntity<String> deletarTodosPacientes() {
         try {
-            long countBefore = pacienteRepository.count();
-            pacienteRepository.deleteAll();
-            long countAfter = pacienteRepository.count();
+            long countAntes = pacienteService.contarPacientes();
+            pacienteService.deletarTodos();
+            long countDepois = pacienteService.contarPacientes();
 
-            if (countAfter == 0) {
-                return ResponseEntity.ok(
-                        String.format("Todos os %d pacientes foram removidos com sucesso", countBefore));
+            if (countDepois == 0) {
+                return ResponseEntity.ok("Todos os " + countAntes + " pacientes foram removidos com sucesso.");
             } else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("Falha ao remover todos os pacientes");
+                        .body("Falha ao remover todos os pacientes.");
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

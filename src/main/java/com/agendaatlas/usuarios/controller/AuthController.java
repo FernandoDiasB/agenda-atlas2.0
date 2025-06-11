@@ -1,12 +1,8 @@
 package com.agendaatlas.usuarios.controller;
 
-import com.agendaatlas.shared.JwtService;
-import com.agendaatlas.usuarios.model.User;
-import com.agendaatlas.usuarios.repository.UserRepository;
+import com.agendaatlas.usuarios.dto.RegisterRequest;
+import com.agendaatlas.usuarios.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,31 +10,21 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private AuthenticationManager authManager;
-
-    @Autowired
-    private JwtService jwtService;
+    private UserService userService;
 
     @PostMapping("/register")
-    public String register(@RequestBody User user) {
-        user.setSenha(passwordEncoder.encode(user.getSenha()));
-        userRepository.save(user);
-        return "Usuário registrado com sucesso!";
+    public String register(@RequestBody RegisterRequest request) {
+        return userService.register(request);
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody User user) {
-        var auth = new UsernamePasswordAuthenticationToken(
-                user.getEmail(), user.getSenha());
-        authManager.authenticate(auth);
-        User userAutenticado = userRepository.findByEmail(user.getEmail()).get();
-        return jwtService.generateToken(userAutenticado.getEmail());
+    public String login(@RequestBody RegisterRequest request) {
+        return userService.login(request);
     }
 
+    @GetMapping("/token")
+    public String getToken() {
+        return "Token de teste: " + userService.login(
+                new RegisterRequest("usuario@example.com", "senha123"));
+    }
 }
