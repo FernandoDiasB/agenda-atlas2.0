@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin(origins = "*") // ← Isso permite acesso de qualquer origem
 public class AuthController {
 
     @Autowired
@@ -26,7 +27,7 @@ public class AuthController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<User>> listarPacientes() {
+    public ResponseEntity<List<User>> listarUsuarios() {
         return ResponseEntity.ok(userService.listarTodos());
     }
 
@@ -45,6 +46,12 @@ public class AuthController {
     public String login(@RequestBody RegisterRequest request) {
         return userService.login(request);
     }
+
+    // @PostMapping("/logout")
+    // public ResponseEntity<String>logout(){
+
+    //     return ResponseEntity.ok("Logout realizado");
+    // }
 
     @GetMapping("/token")
     public String getToken() {

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import com.agendaatlas.pacientes.model.Paciente;
 import com.agendaatlas.pacientes.service.PacienteService;
 
+@CrossOrigin(origins = {"http://localhost:5500", "http://localhost:8080", "http://127.0.0.1:5500"})
 @RestController
 @RequestMapping("/api/pacientes")
 public class PacienteController {
